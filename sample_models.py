@@ -100,9 +100,7 @@ def cnn_rnn_model(
     # TODO: Add batch normalization
     bn_rnn = BatchNormalization(name="bn_rnn")(simp_rnn)
     # TODO: Add a TimeDistributed(Dense(output_dim)) layer
-    time_dense = TimeDistributed(
-        Dense(output_dim, activation="relu")
-    )(bn_rnn)
+    time_dense = TimeDistributed(Dense(output_dim, activation="relu"))(bn_rnn)
     # Add softmax activation layer
     y_pred = Activation("softmax", name="softmax")(time_dense)
     # Specify the model
@@ -145,17 +143,15 @@ def deep_rnn_model(input_dim, units, recur_layers, output_dim=29):
     for i in range(recur_layers):
         rnn = GRU(
             units,
-            activation='tanh',
+            activation="tanh",
             return_sequences=True,
             implementation=2,
-            name=f'rnn_{i+1}',
+            name=f"rnn_{i+1}",
         )(input_)
-        bn = BatchNormalization(name=f'batch_norm_{i+1}')(rnn)
+        bn = BatchNormalization(name=f"batch_norm_{i+1}")(rnn)
         input_ = bn
     # TODO: Add a TimeDistributed(Dense(output_dim)) layer
-    time_dense = TimeDistributed(
-        Dense(output_dim, activation='relu')
-    )
+    time_dense = TimeDistributed(Dense(output_dim, activation="relu"))(bn)
     # Add softmax activation layer
     y_pred = Activation("softmax", name="softmax")(time_dense)
     # Specify the model
@@ -170,17 +166,22 @@ def bidirectional_rnn_model(input_dim, units, output_dim=29):
     # Main acoustic input
     input_data = Input(name="the_input", shape=(None, input_dim))
     # TODO: Add bidirectional recurrent layer
-    bidir_rnn = Bidirectional(GRU(
-        units,
-        activation='tanh',
-        return_sequences=True,
-        implementation=2,
-        name='rnn',
-    ))
+    bidir_rnn = Bidirectional(
+        GRU(
+            units,
+            activation="tanh",
+            return_sequences=True,
+            implementation=2,
+            name="rnn",
+        )
+    )
     # TODO: Add a TimeDistributed(Dense(output_dim)) layer
     time_dense = TimeDistributed(
-        Dense(output_dim, activation='relu',)
-    )
+        Dense(
+            output_dim,
+            activation="relu",
+        )
+    )(bidir_rnn)
     # Add softmax activation layer
     y_pred = Activation("softmax", name="softmax")(time_dense)
     # Specify the model
@@ -190,7 +191,15 @@ def bidirectional_rnn_model(input_dim, units, output_dim=29):
     return model
 
 
-def final_model(input_dim, filters=200, kernel_size=11, conv_stride=2, conv_border_mode='valid', units=200, output_dim=29,):
+def final_model(
+    input_dim,
+    filters=200,
+    kernel_size=11,
+    conv_stride=2,
+    conv_border_mode="valid",
+    units=200,
+    output_dim=29,
+):
     """Build a deep network for speech"""
     # Main acoustic input
     input_data = Input(name="the_input", shape=(None, input_dim))
@@ -208,24 +217,26 @@ def final_model(input_dim, filters=200, kernel_size=11, conv_stride=2, conv_bord
 
     input_ = bn_cnn
     for i in range(2):
-        rnn = Bidirectional(GRU(
-            units,
-            activation='tanh',
-            return_sequences=True,
-            implementation=2,
-            name=f'rnn_{i+1}',
-        ))(input_)
-        bn = BatchNormalization(name=f'batch_norm_{i+1}')(rnn)
+        rnn = Bidirectional(
+            GRU(
+                units,
+                activation="tanh",
+                return_sequences=True,
+                implementation=2,
+                name=f"rnn_{i+1}",
+            )
+        )(input_)
+        bn = BatchNormalization(name=f"batch_norm_{i+1}")(rnn)
         input_ = bn
     # TODO: Add a TimeDistributed(Dense(output_dim)) layer
-    time_dense = TimeDistributed(
-        Dense(output_dim, activation='relu')
-    )
+    time_dense = TimeDistributed(Dense(output_dim, activation="relu"))(bn)
     # TODO: Add softmax activation layer
-    y_pred = Activation('softmax', name='softmax')(time_dense)
+    y_pred = Activation("softmax", name="softmax")(time_dense)
     # Specify the model
     model = Model(inputs=input_data, outputs=y_pred)
     # TODO: Specify model.output_length
-    model.output_length = lambda x: x
+    model.output_length = lambda x: cnn_output_length(
+        x, kernel_size, conv_border_mode, conv_stride
+    )
     print(model.summary())
     return model
