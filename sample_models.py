@@ -39,7 +39,7 @@ def simple_rnn_model(input_dim, output_dim=29):
     # Main acoustic input
     input_data = Input(name="the_input", shape=(None, input_dim))
     # Add recurrent layer
-    simp_rnn = GRU(output_dim, return_sequences=True, implementation=2, name="rnn")(
+    simp_rnn = LSTM(output_dim, return_sequences=True, implementation=2, name="rnn")(
         input_data
     )
     # Add softmax activation layer
