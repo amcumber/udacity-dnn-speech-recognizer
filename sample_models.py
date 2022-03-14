@@ -181,7 +181,7 @@ def bidirectional_rnn_model(input_dim, units, output_dim=29):
             implementation=2,
             name="rnn",
         )
-    )
+    )(input_data)
     # TODO: Add a TimeDistributed(Dense(output_dim)) layer
     time_dense = TimeDistributed(Dense(output_dim))(bidir_rnn)
     # Add softmax activation layer
