@@ -2,9 +2,9 @@ from sys import implementation
 
 
 try:
-    from keras import backend as K
-    from keras.models import Model
-    from keras.layers import (
+    from tensorflow.keras import backend as K
+    from tensorflow.keras.models import Model
+    from tensorflow.keras.layers import (
         BatchNormalization,
         Conv1D,
         Dense,
@@ -17,10 +17,10 @@ try:
         LSTM,
     )
 except ModuleNotFoundError:
-    print("Module Error, Trying TF2.0...")
-    from tensorflow.keras import backend as K
-    from tensorflow.keras.models import Model
-    from tensorflow.keras.layers import (
+    print("Module Error, Trying Keras and TF1.0...")
+    from keras import backend as K
+    from keras.models import Model
+    from keras.layers import (
         BatchNormalization,
         Conv1D,
         Dense,
@@ -39,7 +39,7 @@ def simple_rnn_model(input_dim, output_dim=29):
     # Main acoustic input
     input_data = Input(name="the_input", shape=(None, input_dim))
     # Add recurrent layer
-    simp_rnn = LSTM(output_dim, return_sequences=True, implementation=2, name="rnn")(
+    simp_rnn = GRU(output_dim, return_sequences=True, implementation=2, name="rnn")(
         input_data
     )
     # Add softmax activation layer
@@ -66,7 +66,7 @@ def rnn_model(input_dim, units, activation, output_dim=29):
     # TODO: Add batch normalization
     bn_rnn = BatchNormalization(name="bn_rnn")(simp_rnn)
     # TODO: Add a TimeDistributed(Dense(output_dim)) layer
-    time_dense = TimeDistributed(Dense(output_dim, activation=activation))(bn_rnn)
+    time_dense = TimeDistributed(Dense(output_dim))(bn_rnn)
     # Add softmax activation layer
     y_pred = Activation("softmax", name="softmax")(time_dense)
     # Specify the model
@@ -94,13 +94,20 @@ def cnn_rnn_model(
     # Add batch normalization
     bn_cnn = BatchNormalization(name="bn_conv_1d")(conv_1d)
     # Add a recurrent layer
-    simp_rnn = SimpleRNN(
-        units, activation="relu", return_sequences=True, implementation=2, name="rnn"
+    # simp_rnn = SimpleRNN(
+    #     units, activation="relu", return_sequences=True, implementation=2, name="rnn"
+    # )(bn_cnn)
+    simp_rnn = GRU(
+        units,
+        activation="tanh",
+        return_sequences=True,
+        implementation=2,
+        name="rnn",
     )(bn_cnn)
     # TODO: Add batch normalization
     bn_rnn = BatchNormalization(name="bn_rnn")(simp_rnn)
     # TODO: Add a TimeDistributed(Dense(output_dim)) layer
-    time_dense = TimeDistributed(Dense(output_dim, activation="relu"))(bn_rnn)
+    time_dense = TimeDistributed(Dense(output_dim))(bn_rnn)
     # Add softmax activation layer
     y_pred = Activation("softmax", name="softmax")(time_dense)
     # Specify the model
@@ -151,7 +158,7 @@ def deep_rnn_model(input_dim, units, recur_layers, output_dim=29):
         bn = BatchNormalization(name=f"batch_norm_{i+1}")(rnn)
         input_ = bn
     # TODO: Add a TimeDistributed(Dense(output_dim)) layer
-    time_dense = TimeDistributed(Dense(output_dim, activation="relu"))(bn)
+    time_dense = TimeDistributed(Dense(output_dim))(bn)
     # Add softmax activation layer
     y_pred = Activation("softmax", name="softmax")(time_dense)
     # Specify the model
@@ -176,12 +183,7 @@ def bidirectional_rnn_model(input_dim, units, output_dim=29):
         )
     )
     # TODO: Add a TimeDistributed(Dense(output_dim)) layer
-    time_dense = TimeDistributed(
-        Dense(
-            output_dim,
-            activation="relu",
-        )
-    )(bidir_rnn)
+    time_dense = TimeDistributed(Dense(output_dim))(bidir_rnn)
     # Add softmax activation layer
     y_pred = Activation("softmax", name="softmax")(time_dense)
     # Specify the model
@@ -229,7 +231,7 @@ def final_model(
         bn = BatchNormalization(name=f"batch_norm_{i+1}")(rnn)
         input_ = bn
     # TODO: Add a TimeDistributed(Dense(output_dim)) layer
-    time_dense = TimeDistributed(Dense(output_dim, activation="relu"))(bn)
+    time_dense = TimeDistributed(Dense(output_dim))(bn)
     # TODO: Add softmax activation layer
     y_pred = Activation("softmax", name="softmax")(time_dense)
     # Specify the model
