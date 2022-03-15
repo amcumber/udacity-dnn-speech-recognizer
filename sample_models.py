@@ -201,8 +201,8 @@ def final_model(
     conv_border_mode="valid",
     units=200,
     output_dim=29,
-    dropout_u=0.1,
-    dropout_w=0.0,
+    recurrent_dropout=0.1,
+    dropout=0.0,
 ):
     """Build a deep network for speech"""
     # Main acoustic input
@@ -227,8 +227,8 @@ def final_model(
                 activation="tanh",
                 return_sequences=True,
                 implementation=2,
-                dropout_u=dropout_u,
-                dropout_w=dropout_w,
+                recurrent_dropout=recurrent_dropout,
+                dropout=dropout,
                 name=f"rnn_{i+1}",
             )
         )(input_)
