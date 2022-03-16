@@ -129,6 +129,5 @@ dmypy.json
 .pyre/
 
 # Data
+archive/
 data/
-*.h5
-*.pickle
